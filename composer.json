@@ -1,0 +1,29 @@
+{
+  "name": "micayael/keycloak-client-bundle",
+  "type": "symfony-bundle",
+  "description": "Cliente para Keycloak",
+  "keywords": ["keycloak"],
+  "homepage": "https://github.com/micayael/keycloak-client-bundle",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Juan Ardissone",
+      "email": "micayael@gmail.com",
+      "homepage": "http://micayael.com"
+    }
+  ],
+  "require": {
+    "guzzlehttp/guzzle": "^6.3",
+    "lcobucci/jwt": "^3.2",
+    "symfony/form": "^4.0",
+    "symfony/framework-bundle": "^4.0",
+    "symfony/security": "^4.0",
+    "symfony/security-guard": "^4.0"
+  },
+  "autoload": {
+    "psr-4": { "Micayael\\Keycloak\\ClientBundle\\": "" }
+  },
+  "config": {
+    "sort-packages": true
+  }
+}
