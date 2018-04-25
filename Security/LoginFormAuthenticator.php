@@ -26,14 +26,12 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
 
     private $formFactory;
     private $router;
-    private $authenticatorClient;
     private $configs;
 
-    public function __construct(FormFactoryInterface $formFactory, RouterInterface $router, Client $csa_guzzleClientAuthenticator, $configs)
+    public function __construct(FormFactoryInterface $formFactory, RouterInterface $router, $configs)
     {
         $this->formFactory = $formFactory;
         $this->router = $router;
-        $this->authenticatorClient = $csa_guzzleClientAuthenticator;
         $this->configs = $configs;
     }
 
@@ -86,7 +84,8 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
                 ];
             }
 
-            $serviceResponse = $this->authenticatorClient->request('post', $config_token_uri, $jsonContentToSend);
+            $client = new Client();
+            $serviceResponse = $client->request('post', $config_token_uri, $jsonContentToSend);
 
             $tokenString = json_decode($serviceResponse->getBody())->token;
 

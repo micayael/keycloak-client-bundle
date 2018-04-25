@@ -1,7 +1,7 @@
 services:
-    authenticator_client.authenticator_user_provider:
-        class: Micayael\Authenticator\ClientBundle\Security\User\AuthenticatorUserProvider
+    keycloak_client.authenticator_user_provider:
+        class: Micayael\Keycloak\ClientBundle\Security\User\AuthenticatorUserProvider
 
-    authenticator_client.login_form_authenticator:
-        class: Micayael\Authenticator\ClientBundle\Security\LoginFormAuthenticator
-        arguments: ['@form.factory', '@router', '@csa_guzzle.client.authenticator', '%authenticator_client_config%']
+    keycloak_client.login_form_authenticator:
+        class: Micayael\Keycloak\ClientBundle\Security\LoginFormAuthenticator
+        arguments: ['@form.factory', '@router', '%keycloak_client_config%']

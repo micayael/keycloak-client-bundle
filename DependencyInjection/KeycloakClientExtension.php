@@ -22,7 +22,7 @@ class KeycloakClientExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
-        $container->setParameter('authenticator_client_config', $config);
+        $container->setParameter('keycloak_client_config', $config);
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');

@@ -1,7 +1,7 @@
-authenticator_security_login:
+keycloak_security_login:
     path:             /login
-    defaults:         { _controller: AuthenticatorClientBundle:Security:login}
+    defaults:         { _controller: KeycloakClientBundle:Security:login}
 
-authenticator_security_logout:
+keycloak_security_logout:
     path:             /logout
-    defaults:         { _controller: AuthenticatorClientBundle:Security:logout}
+    defaults:         { _controller: KeycloakClientBundle:Security:logout}
