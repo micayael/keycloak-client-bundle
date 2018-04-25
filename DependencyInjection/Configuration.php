@@ -20,56 +20,56 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('keycloak_client');
 
-//        $rootNode
-//            ->children()
-//                    ->scalarNode('host')
-//                    ->info('Servidor del authenticator')
-//                    ->cannotBeEmpty()
-//                ->end()
-//
-//                ->scalarNode('token_uri')
-//                    ->info('URI del servicio para obtener tokens')
-//                    ->defaultValue('/api/jwt/token')
-//                    ->cannotBeEmpty()
-//                ->end()
-//
-//                ->enumNode('type')
-//                    ->info('indica si la autenticación contra el servicio del Authenticator debe ser usando basic authentication o app_id')
-//                    ->values(array('basic_auth', 'app_id'))
-//                    ->isRequired()
-//                ->end()
-//
-//                ->scalarNode('change_password_url')
-//                    ->info('indica la url del authenticator para que el usuario solicite nuevamente su password')
-//                    ->isRequired()
-//                ->end()
-//
-//                ->arrayNode('basic_auth')
-//                    ->cannotBeEmpty()
-//                    ->children()
-//                        ->scalarNode('username')
-//                            ->info('Usuario para autenticación por basic authentication')
-//                            ->cannotBeEmpty()
-//                        ->end()
-//                        ->scalarNode('password')
-//                            ->info('Password para autenticación por basic authentication')
-//                            ->cannotBeEmpty()
-//                        ->end()
-//                    ->end()
-//                ->end()
-//
-//                ->scalarNode('app_id')
-//                    ->info('AppId para conexión en caso de haber seleccionado esta forma de autenticación')
-//                    ->cannotBeEmpty()
-//                ->end()
-//
-//                ->scalarNode('default_target_route')
-//                    ->info('Ruta predeterminada para ingresar después de un login si no existe referrer')
-//                    ->defaultValue('admin')
-//                    ->cannotBeEmpty()
-//                ->end()
-//            ->end()
-//        ;
+        $rootNode
+            ->children()
+                ->scalarNode('keycloak_host')
+                    ->info('Servidor de keycloak')
+                    ->isRequired()
+                    ->cannotBeEmpty()
+                ->end()
+
+                ->scalarNode('keycloak_user')
+                    ->info('Usuario de acceso al keycloak')
+                    ->isRequired()
+                    ->cannotBeEmpty()
+                ->end()
+
+                ->scalarNode('keycloak_secret')
+                    ->info('Contraseña de acceso al keycloak')
+                    ->isRequired()
+                    ->cannotBeEmpty()
+                ->end()
+
+                ->scalarNode('keycloak_token_uri')
+                    ->info('URI del servicio para obtener el access_token')
+                    ->isRequired()
+                    ->cannotBeEmpty()
+                ->end()
+
+                ->scalarNode('keycloak_rpt_uri')
+                    ->info('URI del servicio para obtener el rpt_token')
+                    ->isRequired()
+                    ->cannotBeEmpty()
+                ->end()
+
+                ->scalarNode('keycloak_permissions_uri')
+                    ->info('URI del servicio para obtener los permisos')
+                    ->isRequired()
+                    ->cannotBeEmpty()
+                ->end()
+
+                ->scalarNode('change_password_url')
+                    ->info('indica la url para que el usuario cambie su contraseña')
+                    ->isRequired()
+                ->end()
+
+                ->scalarNode('default_target_route')
+                    ->info('Ruta predeterminada para ingresar después de un login si no existe referrer')
+                    ->defaultValue('admin')
+                    ->cannotBeEmpty()
+                ->end()
+            ->end()
+        ;
 
         return $treeBuilder;
     }

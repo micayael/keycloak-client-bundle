@@ -5,7 +5,6 @@ namespace Micayael\Keycloak\ClientBundle\Security;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
-use Lcobucci\JWT\Parser;
 use Micayael\Keycloak\ClientBundle\Form\LoginForm;
 use Micayael\Keycloak\ClientBundle\Security\User\AuthenticatorUser;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -38,8 +37,6 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
     public function getCredentials(Request $request)
     {
         $loginPath = $this->getLoginUrl();
-        // Para eliminar el app_dev.php en caso de ser otro environment diferente a producción
-        $loginPath = substr($loginPath, strrpos($loginPath, '/'));
 
         $isLoginSubmit = $request->getPathInfo() == $loginPath && $request->isMethod('POST');
 
@@ -62,50 +59,68 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
     public function getUser($credentials, UserProviderInterface $userProvider)
     {
         try {
-            $config_token_uri = $this->configs['host'] . $this->configs['token_uri'];
-
-            $jsonContentToSend = null;
-
-            if ($this->configs['type'] === 'basic_auth') {
-                $jsonContentToSend = [
-                    'auth' => [$this->configs['basic_auth']['username'], $this->configs['basic_auth']['password']],
-                    'json' => [
-                        'username' => $credentials['_username'],
-                        'password' => $credentials['_password'],
-                    ],
-                ];
-            } else {
-                $jsonContentToSend = [
-                    'json' => [
-                        'username' => $credentials['_username'],
-                        'password' => $credentials['_password'],
-                        'app_id' => $this->configs['app_id'],
-                    ],
-                ];
-            }
+            $token_uri = $this->configs['keycloak_host'].$this->configs['keycloak_token_uri'];
+            $rpt_uri = $this->configs['keycloak_host'].$this->configs['keycloak_rpt_uri'];
+            $permission_uri = $this->configs['keycloak_host'].$this->configs['keycloak_permissions_uri'];
 
             $client = new Client();
-            $serviceResponse = $client->request('post', $config_token_uri, $jsonContentToSend);
 
-            $tokenString = json_decode($serviceResponse->getBody())->token;
+            //----------------------------------------------------------------------------------------------------------
 
-            $token = (new Parser())->parse((string) $tokenString);
+            $tokenResponse = $client->request('post', $token_uri, [
+                'auth' => [$this->configs['keycloak_user'], $this->configs['keycloak_secret']],
+                'headers' => [
+                    'Content-Type' => 'application/x-www-form-urlencoded',
+                ],
+                'form_params' => [
+                    'username' => $credentials['_username'],
+                    'password' => $credentials['_password'],
+                    'grant_type' => 'password',
+                ],
+            ]);
+
+            $data = json_decode($tokenResponse->getBody(), true);
+
+            $accessToken = $data['access_token'];
+
+            //----------------------------------------------------------------------------------------------------------
+
+            $rptResponse = $client->request('get', $rpt_uri, [
+                'headers' => [
+                    'Authorization' => 'Bearer '.$data['access_token'],
+                ],
+            ]);
+
+            $data = json_decode($rptResponse->getBody(), true);
+
+            //----------------------------------------------------------------------------------------------------------
+
+            $rptResponse = $client->request('post', $permission_uri, [
+                'auth' => [$this->configs['keycloak_user'], $this->configs['keycloak_secret']],
+                'headers' => [
+                    'Content-Type' => 'application/x-www-form-urlencoded',
+                ],
+                'form_params' => [
+                    'token_type_hint' => 'requesting_party_token',
+                    'token' => $data['rpt'],
+                ],
+            ]);
+
+            $data = json_decode($rptResponse->getBody(), true);
+
+            //----------------------------------------------------------------------------------------------------------
 
             $roles = ['ROLE_USER'];
 
-            if($token->getClaim('super_admin')){
-                $roles[] = 'ROLE_ADMIN';
+            foreach ($data['permissions'] as $permiso) {
+                $roles[] = 'ROLE_'.strtoupper($permiso['resource_set_name']);
             }
 
-            foreach ($token->getClaim('permisos') as $permiso) {
-                $roles[] = 'ROLE_'.strtoupper($permiso);
-            }
-
-            return new AuthenticatorUser($token->getClaim('username'), $roles);
+            return new AuthenticatorUser($credentials['_username'], $roles);
         } catch (ConnectException $e) {
-            throw new AuthenticationException('No fue posible autenticar al usuario');
+            throw new AuthenticationException('No fue posible autenticar al usuario: '.$e->getMessage());
         } catch (RequestException $e) {
-            return null;
+            throw new AuthenticationException('Error al intentar obtener los datos del keycloak: '.$e->getMessage());
         }
     }
 
@@ -129,11 +144,16 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
 
     protected function getLoginUrl()
     {
-        return $this->router->generate('authenticator_security_login');
+        return $this->router->generate('keycloak_security_login');
     }
 
     public function supportsRememberMe()
     {
         return false;
+    }
+
+    public function supports(Request $request)
+    {
+        return $request->request->has('login_form');
     }
 }

@@ -1,4 +1,4 @@
-{% extends '@AuthenticatorClient/base.html.twig' %}
+{% extends '@KeycloakClient/base.html.twig' %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -80,7 +80,7 @@
                 <div class="account-wall">
 
                     <img class="logo-img"
-                         src="{{ asset('bundles/authenticatorclient/images/logo_title.png') }}"
+                         src="{{ asset('bundles/keycloakclient/images/logo_title.png') }}"
                          alt="">
 
                     <h1 class="text-center login-title">{{ 'Acceso al Sistema'|trans }}</h1>
@@ -100,7 +100,7 @@
                         </button>
                     </form>
                 </div>
-                <a href="http://localhost:8001/app_dev.php/admin/resetting/request" class="text-center forgot-password">{{ 'Olvidé mi Contraseña' | trans }}</a>
+                <a href="{{ change_password_url }}" class="text-center forgot-password">{{ 'Olvidé mi Contraseña' | trans }}</a>
             </div>
         </div>
     </div>

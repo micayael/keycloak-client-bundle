@@ -1,67 +1,35 @@
-Authenticator Client Bundle
-===========================
+Keycloak Client Bundle
+======================
+
+Conector para keycloak para Symfony4
 
 Instalación del bundle
 ----------------------
 
 ### Agregar al composer.json
 ~~~
-    "require": {
-        ...
-        "micayael/autheticator-client-bundle": "^1.0.0"
-    },
+    composer require "micayael/keycloak-client-bundle:~1.0.0"
 ~~~
 
-### Activación del bundle en el AppKernel.php
-
-~~~
-        $bundles = [
-            ...
-            new Csa\Bundle\GuzzleBundle\CsaGuzzleBundle(),
-            new Micayael\Authenticator\ClientBundle\AuthenticatorClientBundle(),
-            ...
-        ];
-~~~
-
-### Configuración del guzzle para consultar el servicio del authenticator
-
-~~~
-csa_guzzle:
-    profiler: '%kernel.debug%'
-    logger: true
-    clients:
-        authenticator:
-            config:
-                base_uri: http://localhost:8001
-                headers:
-                    "Content-Type": application/json
-~~~
 
 ### Configuración del bundle
 
 > Para ver la documentación de las configuraciones:
-> bin/console config:dump-reference authenticator_client
+> bin/console config:dump-reference keycloak_client
 
 ~~~
-authenticator_client:
-    host: http://IP:PORT
-    token_uri: /api/jwt/token # opcional
-    default_target_route: admin # opcional, default: admin
-    change_password_url: http://authenticator_url/admin/resetting/request
-    type: basic_auth
-    basic_auth:
-        username: app1
-        password: app1
-~~~
+keycloak_client:
+    keycloak_host: http://sso-sso-app-dev.apps.dncp.gov.py
 
-o
+    keycloak_user: SICP
+    keycloak_secret: dc42717b-a354-477d-8822-16ee099aa2a0
 
-~~~
-authenticator_client:
-    host: http://IP:PORT
-    change_password_url: http://authenticator_url/admin/resetting/request
-    type: app_id
-    app_id: app2_id_test
+    keycloak_token_uri: /auth/realms/SICP/protocol/openid-connect/token
+    keycloak_rpt_uri: /auth/realms/SICP/authz/entitlement/SICP
+    keycloak_permissions_uri: /auth/realms/SICP/protocol/openid-connect/token/introspect
+
+    change_password_url: http://localhost:9095/cambiar-clave
+    default_target_route: pliego.index
 ~~~
 
 ### Publicación de assets
@@ -70,23 +38,20 @@ authenticator_client:
 bin/console assets:install --relative --symlink
 ~~~
 
-### Importación de rutas en el archivo routing.yml
+### Importación de rutas en el archivo routes.yaml
 
 ~~~
-authenticator:
-    resource: "@AuthenticatorClientBundle/Resources/config/routing.yml"
+keycloak_client:
+    resource: "@KeycloakClientBundle/Resources/config/routing.yml"
     prefix: /
 ~~~
 
-### Configuración del security
+### Configuración del security.yaml
 
 ~~~
     providers:
-        authenticator:
-            id: 'authenticator_client.authenticator_user_provider'
-
-    encoders:
-        AppBundle\Security\User\AuthenticatorUser: plaintext
+        keycloak:
+            id: 'Micayael\Keycloak\ClientBundle\Security\User\AuthenticatorUserProvider'
 
     firewalls:
         main:
@@ -96,7 +61,7 @@ authenticator:
 
             guard:
                 authenticators:
-                    - 'authenticator_client.login_form_authenticator'
+                    - 'Micayael\Keycloak\ClientBundle\Security\LoginFormAuthenticator'
 
     access_control:
         - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
@@ -107,11 +72,6 @@ Documentación Extra
 -------------------
 
 - Para definir tiempo de vida y nombre de la sesión:  https://symfony.com/doc/current/reference/configuration/framework.html#session
-- En caso de que ocurra un error se puede apuntar en la configuración del
-csa_guzzle al entorno de desarrollo del authenticator
-base_uri: http://localhost:8001/app_dev.php y para ver los datos se puede cambiar la
-configuración dentro del config_dev.yml de la aplicación cliente para que intercepte
-las redirecciones intercept_redirects: true
 
 Referencias
 -----------

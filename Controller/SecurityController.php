@@ -19,10 +19,11 @@ class SecurityController extends Controller
             '_username' => $lastUsername,
         ]);
 
-        return $this->render('@KeycloakClient/security/login.html.twig', array(
+        return $this->render('@KeycloakClient/security/login.html.twig', [
             'form' => $form->createView(),
             'error' => $error,
-        ));
+            'change_password_url' => $this->getParameter('keycloak_client_config')['change_password_url'],
+        ]);
     }
 
     public function logoutAction()
